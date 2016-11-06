@@ -331,7 +331,7 @@ function plot(data) {
 
         })
 
-    })
+    });
 
     // If a Level 1 branch has a child, shift later Level 1 branches to the left
     for (var i = 2; i < data.children.length; i++) {
