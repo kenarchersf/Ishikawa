@@ -1,35 +1,25 @@
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
 
- const Line = React.createClass({
+const Line = (data) => {
 
-  propTypes: {
-    path:         React.PropTypes.string.isRequired,
-    stroke:       React.PropTypes.string,
-    strokeWidth:  React.PropTypes.number
-  },
+    let {path, id} = data;
 
-  getDefaultProps() {
-    return {
-      stroke:       'blue',
-      fill:         'none',
-      strokeWidth:  3
-    };
-  },
-
-  render() {
-    let { path, id, stroke, fill, strokeWidth } = this.props;
     return (
-      <path
-        d={path}
-        id={id}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={strokeWidth}
+        <path
+            d={path}
+            id={id}
+            fill={'none'}
+            stroke={'blue'}
+            strokeWidth={3}
         />
     );
-  }
+};
 
-});
+
+Line.propTypes = {
+    path: React.PropTypes.string.isRequired,
+    stroke: React.PropTypes.string,
+    strokeWidth: React.PropTypes.number
+};
 
 export default Line;

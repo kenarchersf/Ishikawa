@@ -1,28 +1,25 @@
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
 
- const TextPath = React.createClass({
+const TextPath = (data) => {
 
-  propTypes: {
+    let {xlinkhref, branchtext} = data;
+
+    return (
+        <text style={{
+            fontFamily: "Verdana",
+            fontSize: "42.5px",
+            textAlign: "right"
+        }}>
+            <textPath xlinkHref={xlinkhref}>
+                {branchtext}
+            </textPath>
+        </text>
+    );
+};
+
+TextPath.propTypes = {
     xlinkhref: React.PropTypes.string,
     branchtext: React.PropTypes.string
-  },
-
-  render() {
-    let {xlinkhref, branchtext} = this.props;
-    return (
-        <text
-        font-family="Verdana"
-        font-size="42.5"
-        text-align="right"
-        >
-        <textPath xlinkHref={xlinkhref}>
-          {branchtext}
-        </textPath>
-       </text>
-    );
-  }
-
-});
+};
 
 export default TextPath;
