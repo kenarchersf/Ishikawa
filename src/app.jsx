@@ -35,9 +35,10 @@ class LineChart extends Component{
         }, that = this;
 
         [data].map(i => {
+            i.points = [];
             if (i.branch === branchId) {
                 i.children.push(mock);
-                that.setState(data);
+                that.setState({data: data});
             } else {
                 child(i.children)
             }
@@ -45,6 +46,7 @@ class LineChart extends Component{
 
         function child(data) {
             data.map(i => {
+                i.points = [];
                 if (i.branch === branchId) {
                     i.children.push(mock);
                     that.setState(data);
@@ -60,6 +62,7 @@ class LineChart extends Component{
         let that = this;
 
         [data].map(i => {
+            i.points = [];
             if (i.branch === branchId) {
                 i.children.splice(i, 1);
                 this.setState(data);
@@ -70,6 +73,7 @@ class LineChart extends Component{
 
         function child(data) {
             data.map(i => {
+                i.points = [];
                 if (i.branch === branchId) {
                     i.children.splice(i, 1);
                     that.setState(data);
@@ -279,7 +283,11 @@ function plot(data) {
     data.children.map((i, id) => {
 
         if (isEven(id) == true) {
-            i.points.push({x: 50 - (7 * level(id)), y: 18}, {x: 57 - (7 * level(id)), y: 25});
+            i.points.push({
+                x: 50 - (7 * level(id)), y: 18
+            }, {
+                x: 57 - (7 * level(id)), y: 25
+            });
         } else {
             i.points.push({
                 x: 50 - (7 * level(id)), y: 32
@@ -288,59 +296,39 @@ function plot(data) {
             });
         }
 
-        i.children.map((ii, id2) => {
-            Array.prototype.push.apply(ii.points, horizBranch(i, id2));
+        function child(i) {
+            i.children.map((ii, id2) => {
+                ii.points = horizBranch(i, id2);
 
-            if (isEven(id) == true && ii.points[1].y <= i.points[0].y) {
-                i.points[0].y -= 5;
-                i.points[0].x -= 5
-            } else if (isEven(id) == false && ii.points[1].y >= i.points[0].y) {
-                i.points[0].y += 5;
-                i.points[0].x -= 5
-            }
-
-            ii.children.map((iii, id3) => {
-                Array.prototype.push.apply(iii.points, diagBranch(ii, id3));
-
-                if (isEven(id) == true && iii.points[1].x <= ii.points[0].x) {
-                    ii.points[0].x -= 5
+                if (isEven(id) == true && ii.points[1].y <= i.points[0].y) {
+                    i.points[0].y -= 5;
+                    i.points[0].x -= 5
                 } else if (isEven(id) == false && ii.points[1].y >= i.points[0].y) {
                     i.points[0].y += 5;
                     i.points[0].x -= 5
                 }
 
-                if (isEven(id) == true && iii.points[0].y <= ii.points[0].y) {
-                    i.points[0].x -= 5;
-                    i.points[0].y -= 5;
+                child(ii)
+            })
+        }
 
-                    for (var jj = id2 + 1; jj < i.children.length; jj++) {
-                        i.children[jj].points[0].x -= 5;
-                        i.children[jj].points[0].y -= 5;
-                        i.children[jj].points[1].x -= 5;
-                        i.children[jj].points[1].y -= 5;
-
-                        console.log("debug");
-                        console.log(data.children[0].children[1].points[0]);
-                        console.log(data.children[0].children[1].points[1]);
-                        console.log(data.children[0].children[1].points[2]);
-                        console.log(data.children[0].children[1].points[3]);
-                        console.log(data);
-                    }
-                }
-            });
-
-        })
+        child(i);
 
     });
 
     // If a Level 1 branch has a child, shift later Level 1 branches to the left
-    for (var i = 2; i < data.children.length; i++) {
+
+    for (let i = 2; i < data.children.length; i++) {
+
         if (data.children[i - 2].children.length > 0) {
-            var maxLength = Math.max.apply(Math, data.children[i - 2].children.map(horizLength));
-            for (var ia = i; ia < data.children.length; ia += 2) {
+
+            let maxLength = Math.max.apply(Math, data.children[i - 2].children.map(horizLength));
+
+            for (let ia = i; ia < data.children.length; ia += 2) {
                 data.children[ia].points[0].x -= (maxLength - 3);
                 data.children[ia].points[1].x -= (maxLength - 3);
             }
+
         }
     }
 
