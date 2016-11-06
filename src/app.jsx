@@ -5,9 +5,9 @@ import TextPath from './components/TextPath';
 import IconAdd from './components/IconAdd';
 import IconRemove from './components/IconRemove';
 
-class LineChart extends Component{
+class LineChart extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.handleCauseAdd = this.handleCauseAdd.bind(this);
@@ -31,7 +31,8 @@ class LineChart extends Component{
             branch: guid(),
             name: "",
             points: [],
-            children: []
+            children: [],
+            position: true
         }, that = this;
 
         [data].map(i => {
@@ -84,7 +85,7 @@ class LineChart extends Component{
         }
     }
 
-    componentDidMount () {
+    componentDidMount() {
         // $.ajax({
         //     url: this.props.url,
         //     dataType: 'json',
@@ -123,8 +124,8 @@ class LineChart extends Component{
             let branches = [];
             branches.push(data);
 
-            function child(data){
-                if(data.length){
+            function child(data) {
+                if (data.length) {
                     data.map(v => {
                         branches.push(v);
                         child(v.children)
@@ -222,7 +223,7 @@ function level(n) {
 }
 
 function sign(a, b) {
-    return a - b < 0  ? -1 : 1;
+    return a - b < 0 ? -1 : 1;
 }
 
 function shiftUp(item) {
@@ -234,101 +235,95 @@ function horizLength(branch) {
     return branch.points[1].x - branch.points[0].x;
 }
 
-// Assign coordinates to horizontal branches from left to right
-function horizBranch(parent, n) {
+function horizBranch(parent,n) {
     let points = [];
-
-    points.push({
-        x: parent.points[1].x - 10 - (5 * (n + 1)),
-        y: parent.points[1].y + ((n + 1) * 5 * sign(parent.points[0].y, parent.points[1].y))
-    }, {
-        x: parent.points[1].x - (5 * (n + 1)),
-        y: parent.points[1].y + ((n + 1) * 5 * sign(parent.points[0].y, parent.points[1].y))
-    });
-
+    points.push(
+        {x: parent.points[1].x-10-(5*(n+1)), y: parent.points[1].y + ((n+1) * 5 * sign(parent.points[0].y,parent.points[1].y)) },
+        {x: parent.points[1].x-(5*(n+1)), y: parent.points[1].y+((n+1)*5*sign(parent.points[0].y,parent.points[1].y))}
+    );
     return points;
 }
 
 // Assign coordinates to diagonal branches from outside to inside
-function diagBranch(parent, n) {
+function diagBranch(parent,n) {
     let points = [];
     // Diagonal branches on top, then on bottom
-    if (parent.points[0].y < 25) {
-        points.push({
-            x: parent.points[1].x - 7 - (5 * (n + 1)),
-            y: parent.points[1].y - 7
-        }, {
-            x: parent.points[1].x - (5 * (n + 1)), 
-            y: parent.points[1].y
-        });
+    if (parent.points[0].y<25) {
+        points.push(
+            {x: parent.points[1].x-7-(5*(n+1)), y: parent.points[1].y-7},
+            {x: parent.points[1].x-(5*(n+1)), y: parent.points[1].y}
+        );
     }
     else {
-        points.push({
-            x: parent.points[1].x - 7 - (5 * (n + 1)),
-            y: parent.points[1].y + 7
-        }, {
-            x: parent.points[1].x - (5 * (n + 1)), 
-            y: parent.points[1].y
-        });
+        points.push(
+            {x: parent.points[1].x-7-(5*(n+1)), y: parent.points[1].y+7},
+            {x: parent.points[1].x-(5*(n+1)), y: parent.points[1].y}
+        );
     }
     return points;
 }
 
 function plot(data) {
-    data.points.push(
-        {x: 0, y: 25},
-        {x: 55, y: 25}
-    );
+    data.points.push({x: 0, y: 25}, {x: 55, y: 25});
 
-    data.children.map((i, id) => {
+    for (let i = 0; i < data.children.length; i++) {
 
-        if (isEven(id) == true) {
-            i.points.push({
-                x: 50 - (7 * level(id)), y: 18
-            }, {
-                x: 57 - (7 * level(id)), y: 25
-            });
+        if (isEven(i) == true) {
+            data.children[i].points.push({x: 50 - (7 * level(i)), y: 18}, {x: 57 - (7 * level(i)), y: 25});
         } else {
-            i.points.push({
-                x: 50 - (7 * level(id)), y: 32
-            }, {
-                x: 57 - (7 * level(id)), y: 25
-            });
+            data.children[i].points.push({x: 50 - (7 * level(i)), y: 32}, {x: 57 - (7 * level(i)), y: 25});
         }
 
-        function child(i) {
-            i.children.map((ii, id2) => {
-                ii.points = horizBranch(i, id2);
+        for (let j = 0; j < data.children[i].children.length; j++) {
 
-                if (isEven(id) == true && ii.points[1].y <= i.points[0].y) {
-                    i.points[0].y -= 5;
-                    i.points[0].x -= 5
-                } else if (isEven(id) == false && ii.points[1].y >= i.points[0].y) {
-                    i.points[0].y += 5;
-                    i.points[0].x -= 5
+            Array.prototype.push.apply(data.children[i].children[j].points, horizBranch(data.children[i], j));
+
+            if (isEven(i) == true && data.children[i].children[j].points[1].y <= data.children[i].points[0].y) {
+                data.children[i].points[0].y -= 5;
+                data.children[i].points[0].x -= 5
+            } else if (isEven(i) == false && data.children[i].children[j].points[1].y >= data.children[i].points[0].y) {
+                data.children[i].points[0].y += 5;
+                data.children[i].points[0].x -= 5
+            }
+
+            for (let k = 0; k < data.children[i].children[j].children.length; k++) {
+
+                Array.prototype.push.apply(data.children[i].children[j].children[k].points, diagBranch(data.children[i].children[j], k));
+
+                if (isEven(i) == true && data.children[i].children[j].children[k].points[1].x <= data.children[i].children[j].points[0].x) {
+
+                    data.children[i].children[j].points[0].x -= 5
+
+                } else if (isEven(i) == false && data.children[i].children[j].points[1].y >= data.children[i].points[0].y) {
+
+                    data.children[i].points[0].y += 5;
+                    data.children[i].points[0].x -= 5
                 }
 
-                child(ii)
-            })
+                if (isEven(i) == true && data.children[i].children[j].children[k].points[0].y <= data.children[i].children[j].points[0].y) {
+
+                    data.children[i].points[0].x -= 5;
+                    data.children[i].points[0].y -= 5;
+
+                    for (let jj = j; jj < data.children[i].children.length; jj++) {
+                        data.children[i].children[jj].points[0].x -= 5;
+                        data.children[i].children[jj].points[0].y -= 5;
+                        data.children[i].children[jj].points[1].x -= 5;
+                        data.children[i].children[jj].points[1].y -= 5;
+                    }
+                }
+            }
         }
-
-        child(i);
-
-    });
+    }
 
     // If a Level 1 branch has a child, shift later Level 1 branches to the left
-
     for (let i = 2; i < data.children.length; i++) {
-
         if (data.children[i - 2].children.length > 0) {
-
             let maxLength = Math.max.apply(Math, data.children[i - 2].children.map(horizLength));
-
             for (let ia = i; ia < data.children.length; ia += 2) {
                 data.children[ia].points[0].x -= (maxLength - 3);
                 data.children[ia].points[1].x -= (maxLength - 3);
             }
-
         }
     }
 
